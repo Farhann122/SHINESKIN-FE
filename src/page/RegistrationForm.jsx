@@ -2,6 +2,7 @@ import React, { useState } from "react";
 
 import { AiOutlineKey, AiOutlineMail, AiOutlineUser } from "react-icons/ai";
 import axiosInstance from "../../ax";
+import { Link } from "react-router-dom";
 
 const RegistrationForm = () => {
   const [formData, setFormData] = useState({
@@ -71,11 +72,12 @@ const RegistrationForm = () => {
               className="w-full h-full"
             />
           </div>
-          <div className="w-[500px] h-full bg-white rounded-r-lg">
-            <div className="flex justify-center p-10">
-              <h1 className="text-2xl font-semibold text-gray-800">
-                REGISTRATION FORM
+          <div className="w-[500px] h-full bg-white rounded-r-lg font-poppins">
+            <div className="flex flex-col items-center justify-center py-4 gap-4 select-none">
+              <h1 className="text-4xl text-gray-800 font-pacifico">
+                Register
               </h1>
+              <p className="text-gray-600 text-sm font-light">Create your account.</p>
             </div>
             <form className="space-y-4 px-8" onSubmit={handleSubmit}>
               {/* Username Field */}
@@ -165,25 +167,25 @@ const RegistrationForm = () => {
               {/* Submit Button */}
               <button
                 type="submit"
-                className="w-full bg-black text-white py-2 hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-opacity-50"
+                className="w-full bg-black text-white py-2 hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-opacity-50 h-11 rounded-lg shadow-lg duration-500"
               >
                 Register
               </button>
               <div className="flex font-poppins justify-center text-xs ">
-                <h1>Sudah punya akun? </h1>
+                <h1>Already have an account?</h1>
 
-                <a
-                  href="/"
-                  className="text-blue-600 hover:text-blue-800 transition "
+                <Link
+                  to="/"
+                  className="text-blue-600 hover:text-blue-800 transition ml-1"
                 >
-                  Login
-                </a>
+                  Sign In
+                </Link>
               </div>
             </form>
 
             {/* Message Display */}
             {message && (
-              <p className="text-center mt-4 text-red-500">{message}</p>
+              <p className="text-center mt-2 text-red-500">{message}</p>
             )}
           </div>
         </div>

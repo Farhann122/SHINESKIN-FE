@@ -1,26 +1,28 @@
 import { useQuery } from "@tanstack/react-query";
+import { Button, Dropdown, Form, Input, Menu, Modal, Upload } from "antd";
+import AOS from "aos";
+import "aos/dist/aos.css";
 import React, { useEffect, useState } from "react";
-import { Dropdown, Menu, Button, Alert, Popconfirm } from "antd";
-
 import {
+  AiFillSave,
   AiOutlineInstagram,
+  AiOutlineLogout,
   AiOutlineMail,
+  AiOutlineProfile,
   AiOutlineUser,
   AiOutlineWhatsApp,
 } from "react-icons/ai";
-import { IoArrowRedo } from "react-icons/io5";
+import { FcAddImage } from "react-icons/fc";
 import { GiShoppingCart } from "react-icons/gi";
+import { GrTransaction } from "react-icons/gr";
+import { IoArrowRedo } from "react-icons/io5";
 import { RiDeleteBin5Line } from "react-icons/ri";
-import { Link, Navigate, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Link as ScrollLink } from "react-scroll";
 import axiosInstance from "../../ax";
 import bgdashboard from "../assets/bgdashboard.jpg";
 import promo from "../assets/promo.png";
 import { useCart } from "./Cart";
-import AOS from "aos";
-import "aos/dist/aos.css";
-import { Form, Input, Modal, Upload } from "antd";
-import { TiUploadOutline } from "react-icons/ti";
 
 const Dashboard = () => {
   const {
@@ -33,8 +35,10 @@ const Dashboard = () => {
   const [showPopUp, setShowPopUp] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [user, setUser] = useState(null);
-  const navigate = useNavigate();
+  const [isLogin, setIsLogin] = useState(!!localStorage.getItem("token"));
+  const [transactions, setTransactions] = useState([]);
   const [modalTransaksi, setModalTransaksi] = useState(false);
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     username: "",
     email: "",
@@ -42,6 +46,12 @@ const Dashboard = () => {
     confirmPassword: "",
     imageProfile: "",
   });
+
+  useEffect(() => {
+    if (isLogin) {
+      refetchCart();
+    }
+  }, [isLogin, refetchCart]);
 
   useEffect(() => {
     AOS.init({
@@ -65,15 +75,48 @@ const Dashboard = () => {
     };
     fetchUserData();
   }, []);
+
+  useEffect(() => {
+    if (isLogin) {
+      const fetchTransactions = async () => {
+        try {
+          const response = await axiosInstance.get("/api/auth-transactions");
+          setTransactions(response.data.data); // Menyimpan data transaksi
+          console.log(response.data.data);
+        } catch (error) {
+          console.error("Error fetching transactions:", error);
+        }
+      };
+
+      fetchTransactions();
+    }
+  }, [isLogin]);
   const handleUpdateUser = async (values) => {
     try {
-      const response = await axiosInstance.put("/api/update/user", {
-        username: values.username,
-        email: values.email,
-        password: values.password,
-        confirmPassword: values.confirmPassword,
-        imageProfile: values.imageProfile,
-      });
+      const updatedData = new FormData();
+
+      updatedData.append("username", values.username);
+      updatedData.append("email", values.email);
+      updatedData.append("password", values.password);
+      updatedData.append("confirmPassword", values.confirmPassword);
+
+      if (values.imageProfile instanceof File) {
+        updatedData.append("imageProfile", values.imageProfile);
+      } else if (formData.imageProfile instanceof File) {
+        updatedData.append("imageProfile", formData.imageProfile);
+      }
+
+      // Mengirim data ke server
+      const response = await axiosInstance.put(
+        "/api/update/user",
+        updatedData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
       if (response.status === 200) {
         Modal.success({
           title: "Update Successful",
@@ -129,17 +172,12 @@ const Dashboard = () => {
     setIsModalOpen(true);
   };
 
-  const handleOk = () => {
-    setIsModalOpen(false);
-  };
-
   const handleCancel = () => {
     setIsModalOpen(false);
   };
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("email"); // Hapus email
-   
     navigate("/");
   };
 
@@ -240,11 +278,8 @@ const Dashboard = () => {
                         <RiDeleteBin5Line className="text-red-500 text-xl shadow-lg rounded-lg" />
                       </button>
                     </div>
-                    
                   ))
-                  
                 )}
-                
                 <h3 className="text-lg font-semibold mt-4">
                   Total : IDR{" "}
                   {Number(grandTotalPrice).toLocaleString("id-ID", {
@@ -254,21 +289,30 @@ const Dashboard = () => {
                 <button className="mt-4 bg-slate-500 text-white px-4 py-2 rounded-lg w-full font-semibold">
                   Check Out
                 </button>
-
-               
               </div>
             )}
             <Dropdown
               overlay={
                 <Menu>
                   <Menu.Item key="1" onClick={showModal}>
-                    Profile
+                    <div className="flex items-center justify-center gap-2 font-poppins">
+                      <AiOutlineProfile />
+                      <span className="tracking-wider font-light">Profil</span>
+                    </div>
                   </Menu.Item>
                   <Menu.Item key="2" onClick={handleRiwayatTransaksi}>
-                    Riwayat Transaksi
+                    <div className="flex items-center justify-center gap-2 font-poppins">
+                      <GrTransaction />
+                      <span className="tracking-wider font-light">
+                        Riwayat Transaksi
+                      </span>
+                    </div>
                   </Menu.Item>
                   <Menu.Item key="3" onClick={handleLogout}>
-                    Logout
+                    <div className="flex items-center justify-center gap-2 font-poppins">
+                      <AiOutlineLogout />
+                      <span className="tracking-wider font-light">Logout</span>
+                    </div>
                   </Menu.Item>
                 </Menu>
               }
@@ -279,19 +323,14 @@ const Dashboard = () => {
 
             <Modal
               title={
-                <span className="text-xl font-semibold text-gray-800">
-                  Profile
+                <span className="text-2xl font-semibold text-gray-800 font-poppins select-none">
+                  Profil Saya
                 </span>
               }
               open={isModalOpen}
-              onOk={handleOk}
               onCancel={handleCancel}
-              okButtonProps={{
-                className: "bg-green-500 text-white hover:bg-green-700",
-              }}
-              cancelButtonProps={{
-                className: "bg-red-500 text-white hover:bg-red-700",
-              }}
+              footer={null}
+              maskClosable={true}
             >
               <Form
                 layout="vertical"
@@ -307,11 +346,19 @@ const Dashboard = () => {
                 <Form.Item style={{ textAlign: "center" }}>
                   <div className="mb-4 flex justify-center items-center">
                     {formData.imageProfile ? (
-                      <img
-                        src={`https://shineskin.hotelmarisrangkas.com/profile/${formData.imageProfile}`}
-                        alt="Profile"
-                        className="w-24 h-24 rounded-full mx-auto object-cover"
-                      />
+                      typeof formData.imageProfile === "string" ? (
+                        <img
+                          src={`https://shineskin.hotelmarisrangkas.com/profile/${formData.imageProfile}`}
+                          alt="Profile"
+                          className="w-24 h-24 rounded-full mx-auto object-cover"
+                        />
+                      ) : (
+                        <img
+                          src={URL.createObjectURL(formData.imageProfile)}
+                          alt="Profile"
+                          className="w-24 h-24 rounded-full mx-auto object-cover"
+                        />
+                      )
                     ) : (
                       <span className="text-gray-500">No image uploaded</span>
                     )}
@@ -325,22 +372,19 @@ const Dashboard = () => {
                         message.error("You can only upload image files!");
                         return Upload.LIST_IGNORE;
                       }
-                      const reader = new FileReader();
-                      reader.onload = () => {
-                        setFormData((prev) => ({
-                          ...prev,
-                          imageProfile: reader.result,
-                        }));
-                      };
-                      reader.readAsDataURL(file);
+                      setFormData((prev) => ({
+                        ...prev,
+                        imageProfile: file,
+                      }));
                       return false;
                     }}
                   >
                     <Button
-                      icon={<TiUploadOutline />}
-                      className="bg-blue-500 text-white"
+                      icon={<FcAddImage className="text-lg" />}
+                      type="dashed"
+                      className="text-slate-400 h-10 font-poppins"
                     >
-                      Change Image
+                      Upload Image
                     </Button>
                   </Upload>
                 </Form.Item>
@@ -352,7 +396,7 @@ const Dashboard = () => {
                     { required: true, message: "Please input the username!" },
                   ]}
                 >
-                  <Input />
+                  <Input className="h-11 text-slate-500 font-poppins" />
                 </Form.Item>
                 <Form.Item
                   label="Email"
@@ -361,7 +405,7 @@ const Dashboard = () => {
                     { required: true, message: "Please input the email!" },
                   ]}
                 >
-                  <Input />
+                  <Input className="h-11 text-slate-500 font-poppins" />
                 </Form.Item>
                 <Form.Item
                   label="Password"
@@ -370,7 +414,11 @@ const Dashboard = () => {
                     { required: true, message: "Please input the password!" },
                   ]}
                 >
-                  <Input type="password" />
+                  <Input
+                    type="password"
+                    className="h-11 text-slate-500"
+                    placeholder="********"
+                  />
                 </Form.Item>
                 <Form.Item
                   label="Confirm Password"
@@ -382,15 +430,21 @@ const Dashboard = () => {
                     },
                   ]}
                 >
-                  <Input type="password" />
+                  <Input
+                    type="password"
+                    className="h-11 text-slate-500"
+                    placeholder="********"
+                  />
                 </Form.Item>
                 <Form.Item>
                   <Button
                     type="primary"
                     htmlType="submit"
                     style={{ width: "100%" }}
+                    className="h-11 font-poppins"
                   >
-                    Update User
+                    <AiFillSave className="text-lg" />
+                    Save Change
                   </Button>
                 </Form.Item>
               </Form>
@@ -401,14 +455,56 @@ const Dashboard = () => {
               onCancel={() => setModalTransaksi(false)}
               footer={null}
               width={500}
-              okButtonProps={{
-                className: "bg-green-500 text-white hover:bg-green-700",
-              }}
-              cancelButtonProps={{
-                className: "bg-red-500 text-white hover:bg-red-700",
-              }}
+              maskClosable={true}
             >
-              <h1>Riwayat Transaksi</h1>
+              <span className="text-2xl font-semibold text-gray-800 font-poppins select-none">
+                Riwayat Transaksi
+              </span>
+              {transactions.length > 0 ? (
+                <div className="font-poppins mt-4">
+                  {transactions.map((transaction) => (
+                    <div key={transaction.id}>
+                      <div>
+                        <strong>ID Transaksi :</strong> {transaction.id}
+                      </div>
+                      <div>
+                        <strong>Status :</strong> {transaction.status}
+                      </div>
+                      <div>
+                        <strong>Total Harga :</strong> Rp{" "}
+                        {Number(transaction.total_price).toLocaleString(
+                          "id-ID",
+                          {
+                            style: "decimal",
+                          }
+                        )}
+                      </div>
+                      <div>
+                        <strong>Tanggal :</strong>{" "}
+                        {new Date(transaction.createdAt).toLocaleDateString(
+                          "id-ID"
+                        )}
+                      </div>
+                      <div>
+                        <strong>Produk :</strong>
+                        <ul>
+                          {transaction.products.map((product) => (
+                            <li key={product.id}>
+                              {product.name} : IDR{" "}
+                              {Number(product.price).toLocaleString("id-ID", {
+                                style: "decimal",
+                              })}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                      <hr />
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p>Tidak ada riwayat transaksi.</p>
+              )}
             </Modal>
           </div>
         </div>
@@ -549,6 +645,7 @@ const Dashboard = () => {
           </div>
         </div>
       </section>
+
       {/* Section 4: Promo */}
       <section
         id="promo"
@@ -589,6 +686,7 @@ const Dashboard = () => {
           </div>
         </div>
       </section>
+
       {/* Footer */}
       <section
         id="footer"
