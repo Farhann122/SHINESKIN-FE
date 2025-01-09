@@ -23,6 +23,7 @@ import axiosInstance from "../../ax";
 import bgdashboard from "../assets/bgdashboard.jpg";
 import promo from "../assets/promo.png";
 import { useCart } from "./Cart";
+import CheckOutModal from "../component/CheckOutModal";
 
 const Dashboard = () => {
   const {
@@ -34,6 +35,7 @@ const Dashboard = () => {
   } = useCart();
   const [showPopUp, setShowPopUp] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isCheckOut, setIsCheckOut] = useState(false);
   const [user, setUser] = useState(null);
   const [isLogin, setIsLogin] = useState(!!localStorage.getItem("token"));
   const [transactions, setTransactions] = useState([]);
@@ -175,6 +177,14 @@ const Dashboard = () => {
   const handleCancel = () => {
     setIsModalOpen(false);
   };
+
+  const handleCheckOut = () => {
+  setIsCheckOut(true);
+  };
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+  };
+ 
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("email"); // Hapus email
@@ -286,9 +296,12 @@ const Dashboard = () => {
                     style: "decimal",
                   })}
                 </h3>
-                <button className="mt-4 bg-slate-500 text-white px-4 py-2 rounded-lg w-full font-semibold">
+                <div>
+                <button className="mt-4 bg-slate-500 text-white px-4 py-2 rounded-lg w-full font-semibold " onClick={handleCheckOut}>
                   Check Out
                 </button>
+                <CheckOutModal isOpen={isCheckOut} onClose={handleCloseModal} />
+                </div>
               </div>
             )}
             <Dropdown

@@ -24,9 +24,9 @@ const OrderAdmin = () => {
   const [loading, setLoading] = useState(true);
   const [openModal, setOpenModal] = useState(false);
   const [selectedTransaction, setSelectedTransaction] = useState(null);
-  const [totalAmount, setTotalAmount] = useState(0); // Total keseluruhan transaksi
-  const [totalPending, setTotalPending] = useState(0); // Total transaksi dengan status PENDING
-  const [totalSuccess, setTotalSuccess] = useState(0); // Total transaksi dengan status SUCCESS
+  const [totalAmount, setTotalAmount] = useState(0);
+  const [totalPending, setTotalPending] = useState(0);
+  const [totalSuccess, setTotalSuccess] = useState(0);
   const [dailySales, setDailySales] = useState([]);
 
   useEffect(() => {
@@ -49,7 +49,7 @@ const OrderAdmin = () => {
           return acc;
         }, 0);
 
-        setTotalAmount(totalAmount); // Update totalAmount dengan hasil perhitungan
+        setTotalAmount(totalAmount);
 
         // Menghitung total transaksi dengan status PENDING
         const totalPending = transactions
@@ -62,7 +62,7 @@ const OrderAdmin = () => {
             return acc;
           }, 0);
 
-        setTotalPending(totalPending); // Update totalPending
+        setTotalPending(totalPending);
 
         // Menghitung total transaksi dengan status SUCCESS
         const totalSuccess = transactions
@@ -75,7 +75,7 @@ const OrderAdmin = () => {
             return acc;
           }, 0);
 
-        setTotalSuccess(totalSuccess); // Update totalSuccess
+        setTotalSuccess(totalSuccess);
 
         // Hitung penjualan harian
         calculateDailySales(transactions);
@@ -104,7 +104,7 @@ const OrderAdmin = () => {
     // Konversi object ke array dan urutkan berdasarkan tanggal
     const sortedByDate = Object.entries(groupedByDate)
       .map(([date, total]) => ({ date, total }))
-      .sort((a, b) => new Date(a.date) - new Date(b.date)); // Urutkan berdasarkan tanggal
+      .sort((a, b) => new Date(a.date) - new Date(b.date));
 
     setDailySales(sortedByDate);
   };
@@ -117,8 +117,13 @@ const OrderAdmin = () => {
   const handleSuccess = async () => {
     if (!selectedTransaction) return;
 
+    // Prevent clicking "Success" if the transaction is already successful
+    if (selectedTransaction.status === "SUCCESS") {
+      message.warning("This transaction has already been marked as SUCCESS.");
+      return;
+    }
+
     try {
-      // API call to update transaction status
       await axiosInstance.put(
         `/api/set-success/${selectedTransaction.id}`,
         {},
@@ -127,13 +132,13 @@ const OrderAdmin = () => {
         }
       );
 
-      // Fetch updated transactions from the server
       const response = await axiosInstance.get("/api/transactions", {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
+
       setTotalTransaction(response.data.data);
 
-      // Menghitung kembali total seluruh transaksi setelah update status
+      // Recalculate totals after status change
       const totalAmount = response.data.data.reduce((acc, transaction) => {
         const price = parseFloat(transaction.total_price);
         if (!isNaN(price)) {
@@ -141,9 +146,8 @@ const OrderAdmin = () => {
         }
         return acc;
       }, 0);
-      setTotalAmount(totalAmount); // Update totalAmount setelah transaksi diubah
+      setTotalAmount(totalAmount);
 
-      // Menghitung total transaksi dengan status PENDING
       const totalPending = response.data.data
         .filter((transaction) => transaction.status === "PENDING")
         .reduce((acc, transaction) => {
@@ -153,9 +157,8 @@ const OrderAdmin = () => {
           }
           return acc;
         }, 0);
-      setTotalPending(totalPending); // Update totalPending
+      setTotalPending(totalPending);
 
-      // Menghitung total transaksi dengan status SUCCESS
       const totalSuccess = response.data.data
         .filter((transaction) => transaction.status === "SUCCESS")
         .reduce((acc, transaction) => {
@@ -165,19 +168,13 @@ const OrderAdmin = () => {
           }
           return acc;
         }, 0);
-      setTotalSuccess(totalSuccess); // Update totalSuccess
+      setTotalSuccess(totalSuccess);
 
-      // Close modal and display success message
       setOpenModal(false);
-      message.success("Status berhasil diubah menjadi sukses.");
+      message.success("Transaction status successfully updated to SUCCESS.");
     } catch (error) {
       console.error("Error updating status:", error);
-
-      if (error.response && error.response.status === 404) {
-        message.error("Transaksi tidak ditemukan atau sudah berhasil.");
-      } else {
-        message.error("Gagal mengubah status transaksi.");
-      }
+      message.error("Failed to update transaction status.");
     }
   };
 
@@ -238,6 +235,18 @@ const OrderAdmin = () => {
         </Button>
       ),
     },
+    {
+      title: "Image",
+      dataIndex: "imageTransaction",
+      key: "imageTransaction",
+      render: (imageTransaction) => (
+        <img
+          src={`https://shineskin.hotelmarisrangkas.com/public/${imageTransaction}`}
+          alt="Product"
+          width={100}
+        />
+      ),
+    },
   ];
 
   const dailySalesColumns = [
@@ -263,11 +272,8 @@ const OrderAdmin = () => {
           <BreadcrumbComponent />
           <div className="mt-5">
             <h1 className="text-2xl font-bold mb-4">Transactions</h1>
-
-            {/* Menampilkan Total Semua Transaksi */}
             <div className="w-full h-full flex mb-5">
               <Row gutter={16} justify="center" align="middle">
-                {/* Total All Transactions */}
                 <Col>
                   <Card>
                     <Statistic
@@ -278,8 +284,6 @@ const OrderAdmin = () => {
                     />
                   </Card>
                 </Col>
-
-                {/* Total Success Transactions */}
                 <Col>
                   <Card>
                     <Statistic
@@ -290,8 +294,6 @@ const OrderAdmin = () => {
                     />
                   </Card>
                 </Col>
-
-                {/* Total Pending Transactions */}
                 <Col>
                   <Card>
                     <Statistic
@@ -314,7 +316,6 @@ const OrderAdmin = () => {
               bordered
             />
 
-            {/* Tabel untuk Total Penjualan Harian */}
             <h2 className="text-xl font-bold mt-8 mb-4">Daily Sales</h2>
             <Table
               columns={dailySalesColumns}
@@ -333,6 +334,9 @@ const OrderAdmin = () => {
           >
             {selectedTransaction ? (
               <div>
+      
+                
+
                 <p>
                   <strong>Transaction ID:</strong> {selectedTransaction.id}
                 </p>
@@ -381,7 +385,14 @@ const OrderAdmin = () => {
               <p>No transaction selected</p>
             )}
             <div className="flex justify-end">
-              <Button type="primary" onClick={handleSuccess}>
+              <Button
+                type="primary"
+                onClick={handleSuccess}
+                disabled={selectedTransaction?.status === "SUCCESS"}
+                style={{
+                  backgroundColor: selectedTransaction?.status === "SUCCESS" ? "gray" : "#1890ff",
+                }}
+              >
                 Success
               </Button>
             </div>
@@ -391,5 +402,8 @@ const OrderAdmin = () => {
     </Layout>
   );
 };
+
+
+
 
 export default OrderAdmin;
