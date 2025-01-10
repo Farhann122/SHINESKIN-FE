@@ -8,24 +8,28 @@ const useCart = () => useContext(CartContext);
 
 const fetchCartItems = async () => {
   const response = await axiosInstance.get("/api/cart-items");
-  const { data, total_price } = response.data;
+  const { data, total_price, transaction_id } = response.data;
   // console.log(response.data);
-  return { items: data, totalPrice: total_price };
+  return {
+    items: data,
+    totalPrice: total_price,
+    transactionId: transaction_id,
+  };
 };
 
 const Cart = ({ children }) => {
   const isLogin = !!localStorage.getItem("token");
 
   const {
-    data: { items: cartItems = [], totalPrice = 0 } = {},
+    data: { items: cartItems = [], totalPrice = 0, transactionId = null } = {},
     isLoading,
-    refetch,  
+    refetch,
   } = useQuery({
     queryKey: ["cartItems"],
     queryFn: fetchCartItems,
     refetchInterval: 1000,
     enabled: isLogin,
-    initialData: { items: [], totalPrice: 0 },
+    initialData: { items: [], totalPrice: 0, transactionId: null },
   });
 
   const addToCartMutation = useMutation({
@@ -85,6 +89,7 @@ const Cart = ({ children }) => {
         addToCart,
         removeFromCart,
         updateQuantity,
+        transactionId,
         grandTotalPrice,
         loading: isLoading,
         refetchCart: refetch,
