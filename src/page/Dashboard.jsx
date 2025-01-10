@@ -23,7 +23,7 @@ import axiosInstance from "../../ax";
 import bgdashboard from "../assets/bgdashboard.jpg";
 import promo from "../assets/promo.png";
 import { useCart } from "./Cart";
-import CheckOutModal from "../component/CheckOutModal";
+
 
 const Dashboard = () => {
   const {
