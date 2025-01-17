@@ -300,7 +300,7 @@ const Dashboard = () => {
                 <button className="mt-4 bg-slate-500 text-white px-4 py-2 rounded-lg w-full font-semibold " onClick={handleCheckOut}>
                   Check Out
                 </button>
-                <CheckOutModal isOpen={isCheckOut} onClose={handleCloseModal} />
+               
                 </div>
               </div>
             )}
