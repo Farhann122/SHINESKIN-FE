@@ -65,7 +65,8 @@ const ProfileUserModal = ({ isOpen, onClose, imageProfile, userId }) => {
     formData.append("username", values.name);
     formData.append("email", values.email);
     if (values.password) formData.append("password", values.password);
-    if (userData.imageProfile) formData.append("imageProfile", userData.imageProfile);
+    if (userData.imageProfile)
+      formData.append("imageProfile", userData.imageProfile);
 
     try {
       await axiosInstance.put(`/api/user/${userId}`, formData, {
@@ -99,7 +100,7 @@ const ProfileUserModal = ({ isOpen, onClose, imageProfile, userId }) => {
           <img
             src={
               imageProfile
-                ? `http://localhost:3888/public/${imageProfile}`
+                ? `https://shineskin.hotelmarisrangkas.com/public/${imageProduct}`
                 : "https://via.placeholder.com/96"
             }
             alt="Profile"

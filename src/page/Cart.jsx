@@ -1,95 +1,82 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import React, { createContext, useContext } from "react";
 import axiosInstance from "../../ax";
 
 const CartContext = createContext();
 
 const useCart = () => useContext(CartContext);
 
+const fetchCartItems = async () => {
+  const response = await axiosInstance.get("/api/cart-items");
+  const { data, total_price } = response.data;
+  // console.log(response.data);
+  return { items: data, totalPrice: total_price };
+};
+
 const Cart = ({ children }) => {
-  const [cartItems, setCartItems] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const isLogin = !!localStorage.getItem("token");
 
-  // Mengambil data keranjang dari API atau localStorage
-  useEffect(() => {
-    const fetchCartItems = async () => {
-      setLoading(true);
-      try {
-        const response = await axiosInstance.get("/api/cart-items");
-        console.log("Cart Items Response:", response.data); // Debug response
-        if (Array.isArray(response.data)) {
-          setCartItems(response.data);
-          localStorage.setItem("cartItems", JSON.stringify(response.data)); // Simpan ke localStorage
-        } else {
-          console.error("Unexpected data format:", response.data);
-        }
-      } catch (error) {
-        console.error("Error fetching cart items:", error);
+  const {
+    data: { items: cartItems = [], totalPrice = 0 } = {},
+    isLoading,
+    refetch,  
+  } = useQuery({
+    queryKey: ["cartItems"],
+    queryFn: fetchCartItems,
+    refetchInterval: 1000,
+    enabled: isLogin,
+    initialData: { items: [], totalPrice: 0 },
+  });
 
-        // Jika API gagal, gunakan data dari localStorage
-        const savedCartItems = localStorage.getItem("cartItems");
-        if (savedCartItems) {
-          setCartItems(JSON.parse(savedCartItems));
-        }
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchCartItems();
-  }, []);
-
-  // Menambahkan produk ke keranjang
-  const addToCart = async (product, quantity) => {
-    try {
-      const response = await axiosInstance.post(`/api/cart-item/${product.id}`, {
+  const addToCartMutation = useMutation({
+    mutationFn: async ({ productId, quantity }) => {
+      const response = await axiosInstance.post(`/api/cart-item/${productId}`, {
         quantity,
       });
-      const newCartItem = response.data.data;
+      // console.log(response.data.data);
+      return response.data.data;
+    },
+    onSuccess: () => {
+      refetch();
+    },
+  });
 
-      setCartItems((prev) => [...prev, newCartItem]);
-      localStorage.setItem(
-        "cartItems",
-        JSON.stringify([...cartItems, newCartItem])
-      ); // Perbarui localStorage
-    } catch (error) {
-      console.error("Error adding to cart:", error);
-    }
-  };
-
-  // Menghapus produk dari keranjang
-  const removeFromCart = async (id) => {
-    try {
+  const removefromCartMutation = useMutation({
+    mutationFn: async (id) => {
       await axiosInstance.delete(`/api/delete/cartItem/${id}`);
-      const updatedCartItems = cartItems.filter((item) => item.id !== id);
-      setCartItems(updatedCartItems);
-      localStorage.setItem("cartItems", JSON.stringify(updatedCartItems)); // Perbarui localStorage
-    } catch (error) {
-      console.error("Error removing from cart:", error);
-    }
-  };
+    },
+    onSuccess: () => {
+      refetch();
+    },
+  });
 
-  // Memperbarui jumlah produk di keranjang
-  const updateQuantity = async (id, quantity) => {
-    try {
+  const updateQuantityMutation = useMutation({
+    mutationFn: async ({ id, quantity }) => {
+      if (quantity < 1) throw new Error("Quantity tidak boleh kurang dari 1");
       const response = await axiosInstance.put(`/api/update/cartItem/${id}`, {
         quantity,
       });
-      const updatedCartItems = cartItems.map((item) =>
-        item.id === id ? { ...item, quantity: response.data.quantity } : item
-      );
+      // console.log(response.data);
+      return response.data;
+    },
+    onSuccess: () => {
+      refetch();
+    },
+  });
 
-      setCartItems(updatedCartItems);
-      localStorage.setItem("cartItems", JSON.stringify(updatedCartItems)); // Perbarui localStorage
-    } catch (error) {
-      console.error("Error updating cart quantity:", error);
-    }
+  const addToCart = (productId, quantity) => {
+    addToCartMutation.mutate({ productId, quantity });
   };
 
-  // Total harga semua produk di keranjang
-  const totalPrice = cartItems.reduce(
-    (total, item) => total + item.subtotal_price,
-    0
-  );
+  const removeFromCart = (id) => {
+    removefromCartMutation.mutate(id);
+  };
+
+  const updateQuantity = (id, quantity) => {
+    updateQuantityMutation.mutate({ id, quantity });
+  };
+
+  const grandTotalPrice = totalPrice;
 
   return (
     <CartContext.Provider
@@ -98,8 +85,9 @@ const Cart = ({ children }) => {
         addToCart,
         removeFromCart,
         updateQuantity,
-        totalPrice,
-        loading,
+        grandTotalPrice,
+        loading: isLoading,
+        refetchCart: refetch,
       }}
     >
       {children}

@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import Sider from "../../component/SIdeBar";
 import Header from "../../component/Header";
+import Sider from "../../component/SideBar";
 import BreadcrumbComponent from "../../component/Breadcrumb";
 import { Button, Image, Layout, notification, Modal, Table, Form, Input, Upload } from "antd";
 import { Content } from "antd/es/layout/layout";
 import { useNavigate } from "react-router-dom";
+import axiosInstance from "../../../ax";
 
 const CategoryAdmin = () => {
   const [category, setCategory] = useState([]);
@@ -21,7 +22,7 @@ const CategoryAdmin = () => {
         return;
       }
       try {
-        const response = await axios.get("http://localhost:3888/api/categories", {
+        const response = await axiosInstance.get("/api/categories", {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (response.data && response.data.data) {
@@ -53,7 +54,7 @@ const CategoryAdmin = () => {
     try {
       const formData = createFormData(values);
 
-      const response = await axios.post("http://localhost:3888/api/category", formData, {
+      const response = await axiosInstance.post("/api/category", formData, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -101,7 +102,7 @@ const CategoryAdmin = () => {
     }
 
     try {
-      const response = await axios.delete(`http://localhost:3888/api/delete/category/${id}`, {
+      const response = await axiosInstance.delete(`/api/delete/category/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -134,7 +135,7 @@ const CategoryAdmin = () => {
       render: (imageCategory) => (
         <Image
           width={100}
-          src={`http://localhost:3888/public/${imageCategory}`}
+          src={`https://shineskin.hotelmarisrangkas.com/public/${imageCategory}`}
           alt="image"
           style={{ objectFit: "cover" }}
         />

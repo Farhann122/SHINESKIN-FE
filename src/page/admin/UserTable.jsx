@@ -5,14 +5,10 @@ import {
   Spin,
   Image,
   notification,
-  Modal,
-  Form,
-  Input,
-  Button,
-} from "antd"; // Import Modal, Form, Input, Button
+} from "antd";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
-import Sider from "../../component/SIdeBar";
+import axiosInstance from "../../../ax";
+import Sider from "../../component/SideBar";
 import Header from "../../component/Header";
 import BreadcrumbComponent from "../../component/Breadcrumb";
 const { Content } = Layout;
@@ -21,9 +17,6 @@ const UserTable = () => {
   const [collapsed, setCollapsed] = useState(false);
   const [userData, setUserData] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [editModalVisible, setEditModalVisible] = useState(false); // State to control the modal visibility
-  const [selectedUser, setSelectedUser] = useState(null); // State to store the selected user for editing
-  const [form] = Form.useForm(); // Ant Design Form hook
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -32,8 +25,8 @@ const UserTable = () => {
       navigate("/");
     }
 
-    axios
-      .get("http://localhost:3888/api/users", {
+    axiosInstance
+      .get("/api/users", {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((response) => {
@@ -49,8 +42,8 @@ const UserTable = () => {
   // Handle Delete User
   const handleDelete = (userId) => {
     const token = localStorage.getItem("token");
-    axios
-      .delete(`http://localhost:3888/api/delete/user/${userId}`, {
+    axiosInstance
+      .delete(`/api/delete/user/${userId}`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((response) => {
@@ -71,50 +64,6 @@ const UserTable = () => {
         notification.error({
           message: "Error",
           description: "There was an error deleting the user.",
-          placement: "topRight",
-        });
-      });
-  };
-
-  // Handle Edit User: Show the modal and pre-fill the form
-  const handleEdit = (userId) => {
-    const user = userData.find((user) => user.id === userId);
-    setSelectedUser(user);
-    form.setFieldsValue({
-      username: user.username,
-      email: user.email,
-      
-    });
-    setEditModalVisible(true); // Open the modal
-  };
-
-  // Handle Form Submission (Edit User)
-  const handleFormSubmit = (values) => {
-    const token = localStorage.getItem("token");
-    axios;
-    axios
-      .put(`http://localhost:3888/api/users/${selectedUser.id}`, values, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        // Update user data in state
-        setUserData(
-          userData.map((user) =>
-            user.id === selectedUser.id ? { ...user, ...values } : user
-          )
-        );
-        setEditModalVisible(false); // Close the modal
-        notification.success({
-          message: "User Updated",
-          description: "The user has been successfully updated.",
-          placement: "topRight",
-        });
-      })
-      .catch((error) => {
-        console.error("Error updating user:", error);
-        notification.error({
-          message: "Error",
-          description: "There was an error updating the user.",
           placement: "topRight",
         });
       });
@@ -148,7 +97,7 @@ const UserTable = () => {
       key: "imageProfile",
       render: (e) => (
         <Image
-          src={`http://localhost:3888/profile/${e}`}
+          src={`https://shineskin.hotelmarisrangkas.com/profile/${e}`}
           width={80}
           height={80}
           alt=""
@@ -160,21 +109,6 @@ const UserTable = () => {
       key: "action",
       render: (text, record) => (
         <div className="flex gap-1">
-          <button
-            style={{
-              backgroundColor: "blue",
-              color: "white",
-              border: "none",
-              padding: "5px 15px",
-              marginRight: "5px",
-              cursor: "pointer",
-              borderRadius: "5px",
-            }}
-            onClick={() => handleEdit(record.id)}
-          >
-            Edit
-          </button>
-
           <button
             style={{
               backgroundColor: "red",
@@ -221,45 +155,6 @@ const UserTable = () => {
           </div>
         </Content>
       </Layout>
-
-      {/* Edit User Modal */}
-      <Modal
-        title="Edit User"
-        visible={editModalVisible}
-        onCancel={() => setEditModalVisible(false)}
-        footer={null} // We'll handle the form submission in the modal
-      >
-        <Form
-          form={form}
-          onFinish={handleFormSubmit}
-          initialValues={{
-            username: selectedUser?.username,
-            email: selectedUser?.email,
-           
-          }}
-        >
-          <Form.Item
-            label="Username"
-            name="username"
-            rules={[{ required: true, message: "Please input the username!" }]}
-          >
-            <Input />
-          </Form.Item>
-          <Form.Item
-            label="Email"
-            name="email"
-            rules={[{ required: true, message: "Please input the email!" }]}
-          >
-            <Input />
-          </Form.Item>
-         
-          <Form.Item>
-            <Button type="primary" htmlType="submit" style={{ width: "100%" }}>
-              Update User
-            </Button>
-          </Form.Item>
-        </Form>
-      </Modal>
     </Layout>
   );
 };

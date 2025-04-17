@@ -1,17 +1,20 @@
 import React, { useState, useEffect } from "react";
+import {
+  Modal,
+  Form,
+  Input,
+  Upload,
+  Button,
+  message as antMessage,
+} from "antd";
+import { UploadOutlined } from "@ant-design/icons";
 import axiosInstance from "../../../ax";
 
-const ProfileAdmin = () => {
+const ProfileAdminModal = () => {
+  const [visible, setVisible] = useState(false);
   const [user, setUser] = useState(null);
-  const [formData, setFormData] = useState({
-    username: "",
-    email: "",
-    password: "",
-    confirmPassword: "",
-    imageProfile: null,
-  });
+  const [form] = Form.useForm();
   const [isLoading, setIsLoading] = useState(false);
-  const [message, setMessage] = useState("");
 
   // Fetch user data on component mount
   useEffect(() => {
@@ -19,162 +22,149 @@ const ProfileAdmin = () => {
       try {
         const response = await axiosInstance.get("/api/user");
         setUser(response.data.data);
-        setFormData({
+        form.setFieldsValue({
           username: response.data.data.username || "",
           email: response.data.data.email || "",
-          password: "",
-          confirmPassword: "",
-          imageProfile: null,
         });
       } catch (error) {
         console.error("Error fetching user data:", error);
       }
     };
     fetchUserData();
-  }, []);
-
-  // Handle form input change
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prevState) => ({
-      ...prevState,
-      [name]: value,
-    }));
-  };
-
-  // Handle file input change
-  const handleFileChange = (e) => {
-    setFormData((prevState) => ({
-      ...prevState,
-      imageProfile: e.target.files[0],
-    }));
-  };
+  }, [form]);
 
   // Handle form submission
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleSubmit = async (values) => {
     setIsLoading(true);
-    setMessage("");
+    const { username, email, password, confirmPassword, imageProfile } = values;
 
     try {
       const formDataToSend = new FormData();
-      formDataToSend.append("username", formData.username);
-      formDataToSend.append("email", formData.email);
-      formDataToSend.append("password", formData.password);
-      formDataToSend.append("confirmPassword", formData.confirmPassword);
+      formDataToSend.append("username", username);
+      formDataToSend.append("email", email);
+      if (password) formDataToSend.append("password", password);
+      if (confirmPassword)
+        formDataToSend.append("confirmPassword", confirmPassword);
 
-      if (formData.imageProfile) {
-        formDataToSend.append("imageProfile", formData.imageProfile);
+      if (imageProfile?.file) {
+        formDataToSend.append("imageProfile", imageProfile.file);
       }
 
-      const response = await axiosInstance.put("/api/update/user", formDataToSend, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
+      const response = await axiosInstance.put(
+        "/api/update/user",
+        formDataToSend,
+        {
+          headers: { "Content-Type": "multipart/form-data" },
+        }
+      );
 
-      setMessage(response.data.message);
+      antMessage.success(response.data.message);
+      setVisible(false);
     } catch (error) {
       console.error("Error updating user:", error);
-      setMessage(error.response?.data?.message || "Error updating profile");
+      antMessage.error(
+        error.response?.data?.message || "Error updating profile"
+      );
     } finally {
       setIsLoading(false);
     }
   };
 
-  if (!user) {
-    return <p className="text-center text-gray-500">Loading...</p>;
-  }
-
   return (
-    <main className="flex justify-center w-full h-screen bg-slate-500 items-center ">
-    <div className=" w-[400px] h-[650px] p-6 bg-white rounded-lg shadow-md  ">
-      <h1 className="text-2xl font-bold text-gray-800 text-center mb-6">
-        Profile Admin
-      </h1>
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <div>
-          <label className="block text-gray-700 font-medium mb-2">
-            Username:
-          </label>
-          <input
-            type="text"
-            name="username"
-            value={formData.username}
-            onChange={handleChange}
-            className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
+    <div>
+      <Button type="primary" onClick={() => setVisible(true)}>
+        Edit Profile
+      </Button>
 
-        <div>
-          <label className="block text-gray-700 font-medium mb-2">Email:</label>
-          <input
-            type="email"
-            name="email"
-            value={formData.email}
-            onChange={handleChange}
-            className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
-
-        <div>
-          <label className="block text-gray-700 font-medium mb-2">
-            Password:
-          </label>
-          <input
-            type="password"
-            name="password"
-            value={formData.password}
-            onChange={handleChange}
-            className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
-
-        <div>
-          <label className="block text-gray-700 font-medium mb-2">
-            Confirm Password:
-          </label>
-          <input
-            type="password"
-            name="confirmPassword"
-            value={formData.confirmPassword}
-            onChange={handleChange}
-            className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
-
-        <div>
-          <label className="block text-gray-700 font-medium mb-2">
-            Profile Image:
-          </label>
-          <input
-            type="file"
-            name="imageProfile"
-            accept="image/*"
-            onChange={handleFileChange}
-            className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border file:border-gray-300 file:text-sm file:font-medium file:bg-gray-50 file:text-blue-500 hover:file:bg-blue-100"
-          />
-        </div>
-
-        <button
-          type="submit"
-          disabled={isLoading}
-          className={`w-full px-4 py-2 text-white rounded-lg ${
-            isLoading
-              ? "bg-blue-300 cursor-not-allowed"
-              : "bg-blue-500 hover:bg-blue-600"
-          }`}
+      <Modal
+        title="Edit Profile"
+        open={visible}
+        onCancel={() => setVisible(false)}
+        footer={null}
+        destroyOnClose
+      >
+        <Form
+          form={form}
+          layout="vertical"
+          onFinish={handleSubmit}
+          initialValues={{
+            username: user?.username || "",
+            email: user?.email || "",
+          }}
         >
-          {isLoading ? "Updating..." : "Update Profile"}
-        </button>
-      </form>
+          <Form.Item
+            label="Username"
+            name="username"
+            rules={[{ required: true, message: "Please input your username!" }]}
+          >
+            <Input />
+          </Form.Item>
 
-      {message && (
-        <p className="mt-4 text-center text-green-500 font-medium">{message}</p>
-      )}
+          <Form.Item
+            label="Email"
+            name="email"
+            rules={[
+              { required: true, message: "Please input your email!" },
+              { type: "email", message: "The input is not a valid email!" },
+            ]}
+          >
+            <Input />
+          </Form.Item>
 
-     
+          <Form.Item
+            label="Password"
+            name="password"
+            rules={[
+              {
+                min: 6,
+                message: "Password must be at least 6 characters long",
+              },
+            ]}
+          >
+            <Input.Password />
+          </Form.Item>
+
+          <Form.Item
+            label="Confirm Password"
+            name="confirmPassword"
+            dependencies={["password"]}
+            rules={[
+              {
+                validator(_, value) {
+                  if (!value || form.getFieldValue("password") === value) {
+                    return Promise.resolve();
+                  }
+                  return Promise.reject(new Error("Passwords do not match!"));
+                },
+              },
+            ]}
+          >
+            <Input.Password />
+          </Form.Item>
+
+          <Form.Item
+            label="Profile Image"
+            name="imageProfile"
+            valuePropName="file"
+            getValueFromEvent={(e) => (Array.isArray(e) ? e : e?.fileList[0])}
+          >
+            <Upload
+              listType="picture"
+              beforeUpload={() => false} // Prevent automatic upload
+            >
+              <Button icon={<UploadOutlined />}>Upload</Button>
+            </Upload>
+          </Form.Item>
+
+          <Form.Item>
+            <Button type="primary" htmlType="submit" loading={isLoading} block>
+              {isLoading ? "Updating..." : "Update Profile"}
+            </Button>
+          </Form.Item>
+        </Form>
+      </Modal>
     </div>
-    </main>
   );
 };
 
-export default ProfileAdmin;
+export default ProfileAdminModal;

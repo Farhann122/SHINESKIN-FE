@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { Form, Input, Button, message, Spin, Upload } from "antd";
 import { UploadOutlined } from "@ant-design/icons";
+import axiosInstance from "../../../ax";
 
 const EditUser = () => {
   const { userId } = useParams(); // Getting userId from URL params
@@ -15,8 +16,8 @@ const EditUser = () => {
   useEffect(() => {
     // Fetch user data based on userId
     const token = localStorage.getItem("token");
-    axios
-      .get(`http://localhost:3888/api/user`, {
+    axiosInstance
+      .get(`/api/user`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((response) => {
@@ -53,8 +54,8 @@ const EditUser = () => {
     formData.append("password", values.password);
     formData.append("confirmPassword", values.confirmPassword);
 
-    axios
-      .put(`http://localhost:3888/api/update/user/${userId}`, formData, {
+    axiosInstance
+      .put(`/api/update/user/${userId}`, formData, {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((response) => {
