@@ -227,7 +227,7 @@ const ProductAdmin = () => {
       key: "imageProduct",
       render: (imageProduct) => (
         <img
-          src={`https://shineskin.hotelmarisrangkas.com/public/${imageProduct}`}
+          src={`http://localhost:3888/public/${imageProduct}`}
           alt="Product"
           width={100}
         />

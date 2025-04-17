@@ -100,7 +100,7 @@ const ProfileUserModal = ({ isOpen, onClose, imageProfile, userId }) => {
           <img
             src={
               imageProfile
-                ? `https://shineskin.hotelmarisrangkas.com/public/${imageProduct}`
+                ? `http://localhost:3888/public/${imageProduct}`
                 : "https://via.placeholder.com/96"
             }
             alt="Profile"

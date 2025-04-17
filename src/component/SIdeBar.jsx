@@ -83,7 +83,7 @@ const Sider = () => {
   return (
     <Layout.Sider className="sidebar">
       <div className="flex items-center p-5 gap-5">
-        <h1 className="text-white font-poppins">Shineskin Skincare</h1>
+        <h1 className="text-white font-poppins">Femina Glow</h1>
         <img
           src="https://img.freepik.com/premium-vector/abstract-letter-s-gradient-colorful-logo-vector-icon-illustration_269830-1987.jpg?w=826"
           alt=""

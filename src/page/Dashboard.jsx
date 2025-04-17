@@ -20,7 +20,11 @@ import { RiDeleteBin5Line } from "react-icons/ri";
 import { Link, useNavigate } from "react-router-dom";
 import { Link as ScrollLink } from "react-scroll";
 import axiosInstance from "../../ax";
+import logoBCA from "../assets/BCA.png";
 import bgdashboard from "../assets/bgdashboard.jpg";
+import logoBNI from "../assets/BNI.png";
+import logoBRI from "../assets/BRI.png";
+import logoMandiri from "../assets/MANDIRI.png";
 import promo from "../assets/promo.png";
 import { useCart } from "./Cart";
 
@@ -203,7 +207,7 @@ const Dashboard = () => {
         {/* Navbar */}
         <div className="h-16 flex w-full items-center px-10 fixed top-0 z-50">
           <div className="flex w-[280px] items-center">
-            <h1 className="font-pacifico text-3xl">Shineskin Skincare</h1>
+            <h1 className="font-pacifico text-3xl">Femina Glow</h1>
           </div>
           <nav className="flex justify-center font-poppins text-black gap-6 z-30 flex-grow mr-8 items-center cursor-pointer">
             <ScrollLink to="home" smooth={true} duration={500}>
@@ -295,14 +299,68 @@ const Dashboard = () => {
                     style: "decimal",
                   })}
                 </h3>
-                <div>
-                <button className="mt-4 bg-slate-500 text-white px-4 py-2 rounded-lg w-full font-semibold " onClick={handleCheckOut}>
+                <button
+                  className="mt-4 bg-black text-white px-4 py-3 rounded-lg w-full font-semibold"
+                  onClick={handleOpenCheckoutModal}
+                >
                   Check Out
                 </button>
-               
-                </div>
               </div>
             )}
+
+            {/* Start Checkout Modal */}
+            <Modal
+              open={isCheckoutModalOpen}
+              onOk={handleCheckout}
+              onCancel={handleCloseCheckoutModal}
+              okText="Submit"
+              cancelText="Cancel"
+            >
+              <div className="flex flex-col gap-6">
+                <span className="text-2xl font-semibold text-gray-800 font-poppins select-none">
+                  Unggah Bukti Transaksi
+                </span>
+                <Upload beforeUpload={handleImageUpload} maxCount={1}>
+                  <Button
+                    icon={<FcAddImage className="text-lg"/>}
+                    type="dashed"
+                    className="text-slate-400 h-10 font-poppins"
+                  >
+                    Upload Image
+                  </Button>
+                </Upload>
+              </div>
+
+              <div className="flex flex-col items-start justify-center gap-8 p-4">
+                <div className="flex items-center gap-8">
+                  <img src={logoBCA} alt="..." width={100} />
+                  <p className="text-lg font-bold font-poppins tracking-wider">
+                    1663329650
+                  </p>
+                </div>
+                <div className="flex items-center gap-8">
+                  <img src={logoBRI} alt="..." width={100} />
+                  <p className="text-lg font-bold font-poppins tracking-wider">
+                    1798450932
+                  </p>
+                </div>
+                <div className="flex items-center gap-8">
+                  <img src={logoMandiri} alt="..." width={100} />
+                  <p className="text-lg font-bold font-poppins tracking-wider">
+                    6585432809
+                  </p>
+                </div>
+                <div className="flex items-center gap-8">
+                  <img src={logoBNI} alt="..." width={100} />
+                  <p className="text-lg font-bold font-poppins tracking-wider">
+                    2876093487
+                  </p>
+                </div>
+              </div>
+            </Modal>
+            {/* End Checkout Modal */}
+
+            {/* Start Dropdown */}
             <Dropdown
               overlay={
                 <Menu>
@@ -360,7 +418,7 @@ const Dashboard = () => {
                     {formData.imageProfile ? (
                       typeof formData.imageProfile === "string" ? (
                         <img
-                          src={`https://shineskin.hotelmarisrangkas.com/profile/${formData.imageProfile}`}
+                          src={`http://localhost:3888/profile/${formData.imageProfile}`}
                           alt="Profile"
                           className="w-24 h-24 rounded-full mx-auto object-cover"
                         />
@@ -456,7 +514,7 @@ const Dashboard = () => {
                     className="h-11 font-poppins"
                   >
                     <AiFillSave className="text-lg" />
-                    Save Change
+                    Simpan Perubahan
                   </Button>
                 </Form.Item>
               </Form>
@@ -531,7 +589,7 @@ const Dashboard = () => {
             Selamat Datang
           </h1>
           <h2 className="text-black text-3xl font-poppins font-light select-none">
-            di Shineskin Skincare.
+            di Femina Glow.
           </h2>
           <p className="text-black font-poppins text-lg font-extralight select-none">
             Ayo segera berbelanja, Percantik dirimu mulai dari sekarang miliki
@@ -578,7 +636,7 @@ const Dashboard = () => {
                   </h3>
                   <div className="flex items-center justify-center">
                     <img
-                      src={`https://shineskin.hotelmarisrangkas.com/public/${category.imageCategory}`}
+                      src={`http://localhost:3888/public/${category.imageCategory}`}
                       alt="..."
                       className="w-full h-60 object-contain rounded-lg"
                     />
@@ -611,17 +669,20 @@ const Dashboard = () => {
 
         <div className="w-full h-screen flex flex-col pl-[180px] pt-16 relative z-10 gap-6">
           <div
-            className="max-w-lg bg-white p-8 rounded-lg shadow-lg"
+            className="max-w-xl bg-white p-8 rounded-lg shadow-lg"
             data-aos="fade-up"
             data-aos-duration="1500"
           >
             <h1 className="font-pacifico font-light text-3xl">Tentang Kami</h1>
-            <p className="font-poppins pt-6 text-justify">
-              Lorem ipsum dolor sit amet consectetur adipisicing elit. Ea
-              suscipit quae itaque possimus, ut quia dolor modi quod aliquam.
-              Vero maxime laudantium dolores voluptatem error odio, recusandae
-              quo perspiciatis rem sed, assumenda eaque illo commodi impedit
-              perferendis velit, facere quam!
+            <p className="font-poppins pt-6 text-justify tracking-wider">
+              Femina Glow adalah toko online yang menghadirkan koleksi lengkap
+              produk skincare, makeup, dan scrub berkualitas tinggi, yang
+              dirancang untuk merawat dan mempercantik kulit Anda. Kami percaya
+              bahwa kecantikan dimulai dengan perawatan yang tepat, dan kami
+              berkomitmen untuk memberikan produk-produk terbaik yang aman,
+              efektif, dan sesuai dengan berbagai kebutuhan kulit. Femina Glow
+              hadir untuk mendukung perjalanan Anda menuju kulit yang sehat,
+              bercahaya, dan penuh percaya diri!
             </p>
           </div>
           <div
@@ -632,12 +693,12 @@ const Dashboard = () => {
             <h1 className="text-3xl font-pacifico font-light pb-6">
               Kontak Kami
             </h1>
-            <div className="gap-4 flex flex-col">
+            <div className="gap-4 flex flex-col tracking-widest">
               <div className="flex items-center">
                 <div className="w-[40px] h-[40px] flex items-center justify-center rounded-lg shadow-lg">
                   <AiOutlineInstagram size={25} className="fill-pink-400" />
                 </div>
-                <h1 className="pl-4 font-poppins">Shineskin Skincare</h1>
+                <h1 className="pl-4 font-poppins">Femina Glow</h1>
               </div>
               <div className="flex items-center">
                 <div className="w-[40px] h-[40px] flex items-center justify-center rounded-lg shadow-lg">
@@ -649,9 +710,7 @@ const Dashboard = () => {
                 <div className="w-[40px] h-[40px] flex items-center justify-center rounded-lg shadow-lg">
                   <AiOutlineMail size={25} className="fill-red-500" />
                 </div>
-                <h1 className="pl-4 font-poppins">
-                  ShineskinSkincare@gmail.com
-                </h1>
+                <h1 className="pl-4 font-poppins">FeminaGlow@gmail.com</h1>
               </div>
             </div>
           </div>

@@ -74,10 +74,10 @@ const RegistrationForm = () => {
           </div>
           <div className="w-[500px] h-full bg-white rounded-r-lg font-poppins">
             <div className="flex flex-col items-center justify-center py-4 gap-4 select-none">
-              <h1 className="text-4xl text-gray-800 font-pacifico">
-                Register
-              </h1>
-              <p className="text-gray-600 text-sm font-light">Create your account.</p>
+              <h1 className="text-4xl text-gray-800 font-pacifico">Register</h1>
+              <p className="text-gray-600 text-sm font-light">
+                Create your account.
+              </p>
             </div>
             <form className="space-y-4 px-8" onSubmit={handleSubmit}>
               {/* Username Field */}
@@ -148,7 +148,7 @@ const RegistrationForm = () => {
               </div>
 
               {/* Role Selection */}
-              <div className="relative flex">
+              <div className="relative flex w-full">
                 <select
                   name="role"
                   id="role"
@@ -156,10 +156,9 @@ const RegistrationForm = () => {
                   value={formData.role}
                   onChange={handleChange}
                   required
+                  disabled
                 >
-                  <option value="" disabled>
-                    Select Role
-                  </option>
+                  <option value="">Select Role</option>
                   <option value="user">User</option>
                 </select>
               </div>
@@ -185,7 +184,9 @@ const RegistrationForm = () => {
 
             {/* Message Display */}
             {message && (
-              <p className="text-center mt-2 text-red-500">{message}</p>
+              <p className="text-center mt-2 text-red-500">
+                {message},login to your account!
+              </p>
             )}
           </div>
         </div>

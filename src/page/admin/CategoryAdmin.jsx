@@ -135,7 +135,7 @@ const CategoryAdmin = () => {
       render: (imageCategory) => (
         <Image
           width={100}
-          src={`https://shineskin.hotelmarisrangkas.com/public/${imageCategory}`}
+          src={`http://localhost:3888/public/${imageCategory}`}
           alt="image"
           style={{ objectFit: "cover" }}
         />

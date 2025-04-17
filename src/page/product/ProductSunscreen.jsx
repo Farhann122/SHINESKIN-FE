@@ -250,7 +250,7 @@ const AllProduct = () => {
                 <div className="flex flex-col md:flex-row justify-between items-center gap-6">
                   <div className="flex justify-center">
                     <img
-                      src={`https://shineskin.hotelmarisrangkas.com/public/${product.imageProduct}`}
+                      src={`http://localhost:3888/public/${product.imageProduct}`}
                       alt={product.name}
                       className="w-full h-72 object-contain rounded-lg"
                     />

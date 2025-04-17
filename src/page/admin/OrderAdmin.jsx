@@ -637,7 +637,7 @@ const OrderAdmin = () => {
       key: "imageTransaction",
       render: (imageTransaction) => (
         <img
-          src={`https://shineskin.hotelmarisrangkas.com/public/${imageTransaction}`}
+          src={`http://localhost:3888/public/${imageTransaction}`}
           alt="Product"
           width={100}
         />

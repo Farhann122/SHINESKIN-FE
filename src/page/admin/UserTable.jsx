@@ -97,7 +97,7 @@ const UserTable = () => {
       key: "imageProfile",
       render: (e) => (
         <Image
-          src={`https://shineskin.hotelmarisrangkas.com/profile/${e}`}
+          src={`http://localhost:3888/profile/${e}`}
           width={80}
           height={80}
           alt=""
