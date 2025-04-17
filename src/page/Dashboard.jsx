@@ -18,12 +18,12 @@ import efek from "../assets/efek.png";
 import { useCart } from "./Cart";
 import AOS from "aos";
 import "aos/dist/aos.css";
+
 import ProfileUserModal from "../component/ProfileUserModal";
 
 const Dashboard = () => {
   const { cartItems, totalPrice, updateQuantity, removeFromCart } = useCart();
   const [showPopUp, setShowPopUp] = useState(false);
-  const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
     AOS.init({
@@ -104,45 +104,58 @@ const Dashboard = () => {
                   ✕
                 </button>
 
-                {cartItems.map((item) => (
-                  <div
-                    key={item.id}
-                    className="flex justify-between items-center border-b pb-4 gap-4"
-                  >
-                    <p className="flex-shrink-0 w-1/4">{item.name}</p>
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => {
-                          if (item.quantity > 1) {
-                            updateQuantity(item.id, item.quantity - 1);
+                {cartItems.length === 0 ? (
+                  <p className="text-center text-gray-600">Keranjang kosong</p>
+                ) : (
+                  cartItems.map((item) => (
+                    <div
+                      key={item.id}
+                      className="flex justify-between items-center border-b pb-4 gap-4"
+                    >
+                      <p className="flex-shrink-0 w-1/4">{item.name}</p>
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => {
+                            if (item.quantity > 1) {
+                              updateQuantity(item.id, item.quantity - 1);
+                            }
+                          }}
+                          className="bg-red-500 text-white px-2 rounded-lg shadow-lg"
+                        >
+                          -
+                        </button>
+                        <span>{item.quantity}</span>
+                        <button
+                          onClick={() =>
+                            updateQuantity(item.id, item.quantity + 1)
                           }
-                        }}
-                        className="bg-red-500 text-white px-2 rounded-lg shadow-lg"
-                      >
-                        -
-                      </button>
-                      <span>{item.quantity}</span>
+                          className="bg-green-500 text-white px-2 rounded-lg shadow-lg"
+                        >
+                          +
+                        </button>
+                      </div>
+                      <span className="flex-shrink-0 w-1/5">
+                        IDR{" "}
+                        {(item.price * item.quantity).toLocaleString("id-ID")}
+                      </span>
                       <button
-                        onClick={() =>
-                          updateQuantity(item.id, item.quantity + 1)
-                        }
-                        className="bg-green-500 text-white px-2 rounded-lg shadow-lg"
+                        onClick={() => removeFromCart(item.id)}
+                        className="text-red-500 text-xl shadow-lg rounded-lg"
                       >
-                        +
+                        <RiDeleteBin5Line />
                       </button>
                     </div>
-                    <span className="flex-shrink-0 w-1/5">
-                      IDR {(item.price * item.quantity).toLocaleString("id-ID")}
-                    </span>
-                    <button onClick={() => removeFromCart(item.id)}>
-                      <RiDeleteBin5Line className="text-red-500 text-xl shadow-lg rounded-lg" />
-                    </button>
-                  </div>
-                ))}
+                  ))
+                )}
+
                 <h3 className="text-lg font-semibold mt-4">
                   Total : IDR {totalPrice.toLocaleString("id-ID")}
                 </h3>
-                <button className="mt-4 bg-yellow-500 text-white px-4 py-2 rounded-lg w-full font-semibold">
+
+                <button
+                  onClick={() => alert("Melanjutkan ke checkout")}
+                  className="mt-4 bg-yellow-500 text-white px-4 py-2 rounded-lg w-full font-semibold"
+                >
                   Check Out
                 </button>
               </div>
